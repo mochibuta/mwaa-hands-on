@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: "localstack"
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEFAULT_REGION=ap-northeast-1
+  postgres:
+    image: postgres:10-alpine
+    container_name: "mwaa-postgres"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    volumes:
+      - "${PWD}/db-data:/var/lib/postgresql/data"
+  local-runner:
+    image: amazon/mwaa-local:2.0.2
+    container_name: "mwaa-local-runner"
+    user: 1000:1000
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=Local
+      - AIRFLOW_CONN_AWS_DEFAULT=aws://a:a@?host=http://localstack:4566&region_name=ap-notrheast-1
+      - AWS_DEFAULT_REGION=ap-northeast-1
+      - AWS_PROFILE=default
+    volumes:
+      - "${PWD}/dags:/usr/local/airflow/dags"
+      - "${PWD}/plugins:/usr/local/airflow/plugins"
+      - "${PWD}/.aws:/usr/local/airflow/.aws"
+    ports:
+      - "8080:8080"
+    command: local-runner
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "[ -f /usr/local/airflow/airflow-webserver.pid ]"
+        ]
+      interval: 30s
+      timeout: 30s
+      retries: 3

@@ -1,0 +1,25 @@
+{
+	"name": "mwaa-local",
+	"dockerComposeFile": [
+		"../docker-compose.yml"
+	],
+	"service": "local-runner",
+	"workspaceFolder": "/usr/local/airflow",
+	"settings": {
+		"editor.formatOnSave": true,
+		"python.formatting.provider": "black"
+	},
+	"extensions": [
+		"ms-python.python"
+	]
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// Uncomment the next line if you want start specific services in your Docker Compose config.
+	// "runServices": [],
+	// Uncomment the next line if you want to keep your containers running after VS Code shuts down.
+	// "shutdownAction": "none",
+	// Uncomment the next line to run commands after the container is created - for example installing curl.
+	"postCreateCommand": "pip install black",
+	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
+	"remoteUser": "airflow"
+}
